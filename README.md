@@ -19,6 +19,7 @@ This project contains automation scripts for Reddit using Puppeteer. It includes
    ```env
    EMAIL=your_email@example.com
    PASSWORD=your_password
+   USERNAME=your_username
    ```
 
    ***Test Account***:
