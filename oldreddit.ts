@@ -18,7 +18,10 @@ async function main(): Promise<void> {
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: null,
-    args: ["--start-maximized", "--incognito"],
+    args: [
+      "--start-maximized",
+      "--incognito",
+    ]
   });
 
   const pages = await browser.pages();
@@ -26,16 +29,20 @@ async function main(): Promise<void> {
 
   // 1) Open old.reddit.com
   await page.goto("https://old.reddit.com", { waitUntil: "domcontentloaded" });
+  await page.reload();
   await page.screenshot({ path: "./screenshots/1_Opened Old Reddit Homepage.png" });
   console.log("Step 1: Opened Old Reddit Homepage");
 
   // 2) Check Cookies Policy appeared
-  const cookiesPolicy = await page.waitForSelector("#eu-cookie-policy", { timeout: 5000 });
-  await page.screenshot({ path: "./screenshots/2_Cookies Policy Appeared.png" });
-  if (cookiesPolicy) {
-    await page.click("#eu-cookie-policy > div > div.infobar-btn-container > button");
-    await page.screenshot({ path: "./screenshots/2_Cookies Policy Accepted.png" });
-    console.log("Step 2: Cookies Policy Accepted");
+  try {
+    const cookiesPolicy = await page.waitForSelector("#eu-cookie-policy", { timeout: 3000 });
+    if (cookiesPolicy) {
+      await page.click("#eu-cookie-policy > div > div.infobar-btn-container > button");
+      console.log("Step 2: Cookies Policy Accepted");
+      await page.screenshot({ path: "./screenshots/2_Cookies Policy Accepted.png" });
+    }
+  } catch (e) {
+    console.log("Step 2: Cookies Policy did not appear (skipping)");
   }
 
   // 3) Login Flow
@@ -212,7 +219,7 @@ async function main(): Promise<void> {
   } else if (votingResult.state === "CLICKED") {
     console.log(`Step 5.5: Successfully performed ${decision} on post ${fullname}`);
     await delay(1000); // Wait for animation
-    await page.screenshot({ path: `./screenshots/5_Vote_${decision}.png` });
+    await page.screenshot({ path: `./screenshots/5_Voting Result ${decision}.png` });
   } else if (votingResult.state === "NOT_FOUND") {
     console.error(`Step 5.4: Post ${fullname} no longer found on the page.`);
     await page.screenshot({ path: "./screenshots/error_post_not_found.png" });

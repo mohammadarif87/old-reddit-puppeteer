@@ -16,7 +16,10 @@ async function main() {
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: null,
-    args: ["--start-maximized", "--incognito"],
+    args: [
+      "--start-maximized",
+      "--incognito",
+    ]
   });
 
   const pages = await browser.pages();
@@ -28,12 +31,15 @@ async function main() {
   console.log("Step 1: Opened Old Reddit Homepage");
 
   // 2) Check Cookies Policy appeared
-  const cookiesPolicy = await page.waitForSelector("#eu-cookie-policy", { timeout: 5000 });
-  await page.screenshot({ path: "./screenshots/2_Cookies Policy Appeared.png" });
-  if (cookiesPolicy) {
-    await page.click("#eu-cookie-policy > div > div.infobar-btn-container > button");
-    await page.screenshot({ path: "./screenshots/2_Cookies Policy Accepted.png" });
-    console.log("Step 2: Cookies Policy Accepted");
+  try {
+    const cookiesPolicy = await page.waitForSelector("#eu-cookie-policy", { timeout: 3000 });
+    if (cookiesPolicy) {
+      await page.click("#eu-cookie-policy > div > div.infobar-btn-container > button");
+      console.log("Step 2: Cookies Policy Accepted");
+      await page.screenshot({ path: "./screenshots/2_Cookies Policy Accepted.png" });
+    }
+  } catch (e) {
+    console.log("Step 2: Cookies Policy did not appear (skipping)");
   }
 
   // 3) Login Flow
